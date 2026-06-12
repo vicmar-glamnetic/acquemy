@@ -36,9 +36,10 @@ interface Critique { persuasiveness: number; clarity: number; spamRisk: number; 
 
 function splitSubject(text: string): { subject: string; body: string } {
   const lines = text.split("\n");
-  const idx = lines.findIndex(l => /^\s*subject:/i.test(l));
+  // Match "Subject:", "**Subject:**", "Subject :" etc.
+  const idx = lines.findIndex(l => /^\s*\*{0,2}\s*subject\s*\*{0,2}\s*:/i.test(l));
   if (idx === -1) return { subject: "", body: text.trim() };
-  const subject = lines[idx].replace(/^\s*subject:\s*/i, "").trim();
+  const subject = lines[idx].replace(/^\s*\*{0,2}\s*subject\s*\*{0,2}\s*:\s*/i, "").replace(/\*\*/g, "").trim();
   const body = lines.filter((_, i) => i !== idx).join("\n").trim();
   return { subject, body };
 }
@@ -114,6 +115,7 @@ export default function OutreachPage() {
         setSubject(s); setBody(b); setEditorOpen(true);
         setVariations(null); setCritique(null); setSubjectIdeas(null);
         toast.success("Message generated!"); refreshMessages();
+        if (isEmail && b.trim()) getSubjectIdeas(b); // auto-suggest better subject lines
       } else toast.error(data.error || "Generation failed");
     } catch { toast.error("Network error"); }
     finally { setGenerating(false); }
@@ -166,11 +168,11 @@ export default function OutreachPage() {
     } finally { setCritBusy(false); }
   }
 
-  async function getSubjectIdeas() {
-    if (!body.trim()) return;
+  async function getSubjectIdeas(bodyText = body) {
+    if (!bodyText.trim()) return;
     setSubjBusy(true);
     try {
-      const res = await fetch("/api/ai/subject-lines", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ body, company: form.company }) });
+      const res = await fetch("/api/ai/subject-lines", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ body: bodyText, company: form.company }) });
       const data = await res.json();
       if (res.ok) setSubjectIdeas(data.subjects);
       else toast.error(data.error || "Failed");
@@ -281,7 +283,7 @@ export default function OutreachPage() {
                   <div><Label className="text-xs">Company *</Label><Input value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))} className="mt-1" /></div>
                 </div>
                 <div><Label className="text-xs">Their Role</Label><Input value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))} className="mt-1" /></div>
-                <div><Label className="text-xs">Their Need / Pain Point *</Label><Textarea value={form.need} onChange={e => setForm(f => ({ ...f, need: e.target.value }))} rows={2} className="mt-1 field-sizing-fixed max-h-28 overflow-auto" /></div>
+                <div><Label className="text-xs">Their Need / Pain Point *</Label><Textarea value={form.need} onChange={e => setForm(f => ({ ...f, need: e.target.value }))} rows={7} className="mt-1 field-sizing-fixed" placeholder="What problem are they trying to solve? Any context from the job post, their goals, tech stack, timeline…" /></div>
                 <div className="grid grid-cols-2 gap-3">
                   <div><Label className="text-xs">Channel</Label>
                     <Select value={form.channel} onValueChange={v => v && setForm(f => ({ ...f, channel: v }))}>
@@ -346,20 +348,29 @@ export default function OutreachPage() {
                   <CardContent className="space-y-3">
                     {isEmail && (
                       <div>
-                        <div className="flex items-center justify-between">
-                          <Label className="text-xs flex items-center gap-1.5"><Type className="w-3.5 h-3.5 text-muted-foreground" />Subject</Label>
-                          <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={getSubjectIdeas} disabled={subjBusy || !body.trim()}>
-                            {subjBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1 text-primary" />}3 ideas
-                          </Button>
+                        <Label className="text-xs flex items-center gap-1.5"><Type className="w-3.5 h-3.5 text-muted-foreground" />Subject line</Label>
+                        <Input value={subject} onChange={e => setSubject(e.target.value)} placeholder="Auto-generated from your message…" className="mt-1" />
+                        <div className="mt-1.5">
+                          {subjBusy ? (
+                            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><Loader2 className="w-3 h-3 animate-spin" />Finding stronger subject ideas…</p>
+                          ) : subjectIdeas && subjectIdeas.length > 0 ? (
+                            <div className="rounded-lg border border-primary/30 bg-primary/5 p-2">
+                              <div className="flex items-center justify-between mb-1.5">
+                                <span className="text-[11px] font-semibold text-primary flex items-center gap-1"><Sparkles className="w-3 h-3" />{subjectIdeas.length} subject ideas to improve — tap one</span>
+                                <button onClick={() => getSubjectIdeas()} className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"><RotateCcw className="w-3 h-3" />More</button>
+                              </div>
+                              <div className="flex flex-wrap gap-1.5">
+                                {subjectIdeas.map((s, i) => (
+                                  <button key={i} onClick={() => setSubject(s)} className={cn("px-2.5 py-1 rounded-full text-xs border transition-colors", subject === s ? "border-primary bg-primary/15 text-primary font-medium" : "border-border bg-card hover:border-primary hover:text-primary")}>{s}</button>
+                                ))}
+                              </div>
+                            </div>
+                          ) : (
+                            <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => getSubjectIdeas()} disabled={!body.trim()}>
+                              <Sparkles className="w-3 h-3 mr-1 text-primary" />Suggest subject ideas
+                            </Button>
+                          )}
                         </div>
-                        <Input value={subject} onChange={e => setSubject(e.target.value)} placeholder="Subject line..." className="mt-1" />
-                        {subjectIdeas && (
-                          <div className="flex flex-wrap gap-1.5 mt-1.5">
-                            {subjectIdeas.map((s, i) => (
-                              <button key={i} onClick={() => { setSubject(s); setSubjectIdeas(null); }} className="px-2.5 py-1 rounded-full text-xs border border-border bg-card hover:border-primary hover:text-primary transition-colors">{s}</button>
-                            ))}
-                          </div>
-                        )}
                       </div>
                     )}
 
