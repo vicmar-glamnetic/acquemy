@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Sparkles, Copy, Loader2, Clock, Search, Check, Save, Wand2, RotateCcw, X,
-  Undo2, Mail, FileText, Trash2, Shuffle, Gauge, Type, Send,
+  Undo2, Mail, FileText, Trash2, Shuffle, Gauge, Type,
 } from "lucide-react";
 import { formatDate, cn } from "@/lib/utils";
 
@@ -45,7 +44,6 @@ function splitSubject(text: string): { subject: string; body: string } {
 }
 
 export default function OutreachPage() {
-  const { data: session } = useSession();
   const [tab, setTab] = useState("generate");
   const [form, setForm] = useState({ prospectName: "", company: "", role: "", need: "", channel: "Cold Email", tone: "Professional" });
   const [prospectId, setProspectId] = useState<string | null>(null);
@@ -183,11 +181,14 @@ export default function OutreachPage() {
     const text = subject ? `Subject: ${subject}\n\n${body}` : body;
     navigator.clipboard.writeText(text); toast.success("Copied!");
   }
-  function openEmailApp(testToSelf = false) {
-    const to = testToSelf ? (session?.user?.email || "") : prospectEmail;
-    const subj = encodeURIComponent((testToSelf ? "[TEST] " : "") + (subject || `Introduction from ${session?.user?.name || ""}`));
+  function openCompose(provider: "gmail" | "yahoo") {
+    const to = encodeURIComponent(prospectEmail || "");
+    const su = encodeURIComponent(subject || "");
     const bd = encodeURIComponent(body);
-    window.location.href = `mailto:${to}?subject=${subj}&body=${bd}`;
+    const url = provider === "gmail"
+      ? `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${su}&body=${bd}`
+      : `https://compose.mail.yahoo.com/?to=${to}&subject=${su}&body=${bd}`;
+    window.open(url, "_blank", "noopener,noreferrer");
   }
 
   async function saveDraft() {
@@ -438,13 +439,18 @@ export default function OutreachPage() {
 
                     {/* Email actions */}
                     {isEmail && (
-                      <div className="flex gap-2">
-                        <Button className="flex-1" onClick={() => openEmailApp(false)} disabled={!body.trim() || !prospectEmail} title={prospectEmail ? "" : "Link a prospect with an email"}>
-                          <Mail className="w-4 h-4 mr-1.5" />Open in email app
-                        </Button>
-                        <Button variant="outline" onClick={() => openEmailApp(true)} disabled={!body.trim() || !session?.user?.email} title="Send a test to yourself">
-                          <Send className="w-4 h-4 mr-1.5" />Test
-                        </Button>
+                      <div className="space-y-1.5">
+                        <div className="flex gap-2">
+                          <Button className="flex-1 bg-red-500 hover:bg-red-600 text-white" onClick={() => openCompose("gmail")} disabled={!body.trim()}>
+                            <Mail className="w-4 h-4 mr-1.5" />Compose in Gmail
+                          </Button>
+                          <Button className="flex-1 bg-violet-600 hover:bg-violet-700 text-white" onClick={() => openCompose("yahoo")} disabled={!body.trim()}>
+                            <Mail className="w-4 h-4 mr-1.5" />Compose in Yahoo
+                          </Button>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground text-center">
+                          {prospectEmail ? `Recipient: ${prospectEmail}` : "Opens a prefilled draft — add the “To” there."}
+                        </p>
                       </div>
                     )}
                   </CardContent>
