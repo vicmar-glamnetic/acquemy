@@ -51,11 +51,23 @@ model User {
   proposals  Proposal[]
   activities Activity[]
   settings   UserSetting[]
+  templates  Template[]
 
   onboarded Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Template {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  channel   String   @default("Cold Email")
+  subject   String?
+  content   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Account {

@@ -172,8 +172,8 @@ export default function PipelinePage() {
 
       {/* Board */}
       {loading ? (
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {[1,2,3,4,5].map(i => <div key={i} className="min-w-65 h-64 rounded-xl bg-muted/40 animate-pulse" />)}
+        <div className="flex flex-wrap gap-3">
+          {[1,2,3,4,5].map(i => <div key={i} className="flex-1 min-w-60 h-64 rounded-xl bg-muted/40 animate-pulse" />)}
         </div>
       ) : deals.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border py-16 text-center">
@@ -184,12 +184,12 @@ export default function PipelinePage() {
         </div>
       ) : (
         <DragDropContext onDragEnd={onDragEnd}>
-          <div className="flex gap-3 overflow-x-auto pb-4">
+          <div className="flex flex-wrap gap-3 items-start">
             {PIPELINE_STAGES.map(stage => {
               const stageDeals = deals.filter(d => d.stage === stage);
               const total = stageDeals.reduce((s, d) => s + d.value, 0);
               return (
-                <div key={stage} className="min-w-65 w-65 shrink-0">
+                <div key={stage} className="flex-1 min-w-60">
                   <div className="flex items-center justify-between mb-2 px-1">
                     <div className="flex items-center gap-2">
                       <span className={`w-2 h-2 rounded-full ${STAGE_ACCENT[stage]}`} />
