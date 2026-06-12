@@ -297,20 +297,20 @@ export default function ProspectsPage() {
             </Button>
             <Dialog open={addOpen} onOpenChange={v => { setAddOpen(v); if (!v) { setEditProspect(null); setForm(EMPTY); setOutreachResult(null); setActivities([]); } }}>
               <DialogTrigger render={<Button size="sm"><Plus className="w-4 h-4 mr-1.5" />Add Prospect</Button>} />
-              <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
+              <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto overflow-x-hidden">
                 <DialogHeader><DialogTitle className="text-lg">{editProspect ? "Edit Prospect" : "Add New Prospect"}</DialogTitle></DialogHeader>
-                <div className="space-y-3 mt-1">
-                  <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-3 mt-1 min-w-0">
+                  <div className="grid grid-cols-2 gap-3 min-w-0">
                     <div><Label className="text-xs font-medium">Name <span className="text-red-500">*</span></Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="mt-1" placeholder="John Smith" /></div>
                     <div><Label className="text-xs font-medium">Company <span className="text-red-500">*</span></Label><Input value={form.company} onChange={e => setForm(p => ({ ...p, company: e.target.value }))} className="mt-1" placeholder="Acme Inc." /></div>
                     <div><Label className="text-xs font-medium">Country</Label><Input value={form.country} onChange={e => setForm(p => ({ ...p, country: e.target.value }))} className="mt-1" placeholder="USA" /></div>
                     <div><Label className="text-xs font-medium">Niche</Label><Input value={form.niche} onChange={e => setForm(p => ({ ...p, niche: e.target.value }))} className="mt-1" placeholder="eCommerce" /></div>
                     <div><Label className="text-xs font-medium">Their Role</Label><Input value={form.role} onChange={e => setForm(p => ({ ...p, role: e.target.value }))} className="mt-1" placeholder="Founder, CTO..." /></div>
                     <div><Label className="text-xs font-medium">Email</Label><Input value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} className="mt-1" placeholder="john@acme.com" /></div>
-                    <div className="col-span-2">
+                    <div className="col-span-2 min-w-0">
                       <Label className="text-xs font-medium">LinkedIn / Job URL</Label>
                       <div className="flex gap-2 mt-1">
-                        <Input value={form.linkedinUrl} onChange={e => setForm(p => ({ ...p, linkedinUrl: e.target.value }))} className="flex-1" placeholder="https://linkedin.com/in/..." />
+                        <Input value={form.linkedinUrl} onChange={e => setForm(p => ({ ...p, linkedinUrl: e.target.value }))} className="flex-1 min-w-0" placeholder="https://linkedin.com/in/..." />
                         {form.linkedinUrl && (
                           <a href={form.linkedinUrl} target="_blank" rel="noopener noreferrer" className="shrink-0">
                             <Button type="button" className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white">
@@ -320,7 +320,7 @@ export default function ProspectsPage() {
                         )}
                       </div>
                     </div>
-                    <div className="col-span-2"><Label className="text-xs font-medium">Notes</Label><Textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} rows={3} className="mt-1 max-h-36 overflow-y-auto" placeholder="Context, how you found them..." /></div>
+                    <div className="col-span-2 min-w-0"><Label className="text-xs font-medium">Notes</Label><Textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} rows={3} className="mt-1 max-h-36 w-full field-sizing-fixed overflow-auto break-all" placeholder="Context, how you found them..." /></div>
                   </div>
 
                   {editProspect ? (
