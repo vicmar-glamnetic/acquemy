@@ -25,7 +25,7 @@ const STEPS = [
     icon: Send,
     step: "03",
     title: "AI writes your outreach",
-    desc: "Claude drafts a personalized cold email or proposal for each prospect in your voice. Review, tweak, and send in one click.",
+    desc: "AI drafts a personalized cold email or proposal for each prospect in your voice. Review, tweak, and send in one click.",
   },
   {
     icon: BarChart3,
@@ -38,7 +38,7 @@ const STEPS = [
 const FEATURES = [
   { icon: Search, title: "Right-fit lead discovery", desc: "Scans We Work Remotely, Remote OK, Reddit, Freelancer.com and 12+ more — surfacing only clients that match your niche." },
   { icon: Sparkles, title: "AI personalized to you", desc: "Every proposal and message is written specifically for your skills, experience, and the client in front of you." },
-  { icon: Mail, title: "One-click outreach", desc: "Claude writes a tailored cold email and Resend delivers it instantly — no copy-pasting, no blank-page paralysis." },
+  { icon: Mail, title: "One-click outreach", desc: "AI writes a tailored cold email and Resend delivers it instantly — no copy-pasting, no blank-page paralysis." },
   { icon: BarChart3, title: "Full pipeline management", desc: "Kanban board, deal tracking, AI pipeline coaching, and weekly performance reports keep every opportunity moving." },
   { icon: Users, title: "Multi-source leads", desc: "Import from LinkedIn, Upwork RSS, your website contact form, or add manually — all feeding one unified pipeline." },
   { icon: Zap, title: "Works for any freelancer", desc: "Developer, designer, writer, marketer — Acquemy adapts its AI to your niche and your target clients." },
@@ -75,7 +75,7 @@ export default async function LandingPage() {
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 pt-24 pb-16 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent text-accent-foreground text-xs font-medium mb-6">
-          <Sparkles className="w-3 h-3" />Powered by Claude AI
+          <Sparkles className="w-3 h-3" />Powered by AI
         </div>
         <h1 className="text-5xl md:text-6xl font-extrabold leading-[1.05] tracking-tight mb-6">
           Land the right clients,<br /><span className="text-primary">not just any clients</span>

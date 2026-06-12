@@ -36,7 +36,7 @@ const TOUR = [
   {
     icon: Sparkles,
     title: "4. Generate outreach",
-    desc: "Let Claude draft a personalized cold email or proposal in your voice, then send it in one click.",
+    desc: "Let AI draft a personalized cold email or proposal in your voice, then send it in one click.",
     href: "/outreach",
     cta: "Try outreach",
   },

@@ -282,7 +282,7 @@ export default function PipelinePage() {
                   </div>
                   {selectedDeal.aiNextAction
                     ? <p className="text-xs leading-relaxed">{selectedDeal.aiNextAction}</p>
-                    : <p className="text-xs text-muted-foreground">Let Claude suggest the best next move for this deal.</p>}
+                    : <p className="text-xs text-muted-foreground">Let AI suggest the best next move for this deal.</p>}
                 </div>
 
                 <div className="flex gap-2 pt-1">
