@@ -3,6 +3,10 @@ import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { callClaude, buildSystemPrompt } from "@/lib/anthropic";
 
+// Scanning many feeds in parallel + an AI scoring call can exceed the default
+// serverless limit, so give this route more headroom.
+export const maxDuration = 60;
+
 // Wide range of categories so freelancers in any niche (dev, design, writing,
 // marketing, support, VA, finance, sales) get relevant matches. Failed feeds
 // are ignored (Promise.allSettled), so occasional dead URLs are harmless.
@@ -29,10 +33,21 @@ const JOB_FEEDS = [
   { url: "https://www.workingnomads.com/feed/design-jobs/", source: "Working Nomads" },
   { url: "https://www.workingnomads.com/feed/marketing-jobs/", source: "Working Nomads" },
   { url: "https://www.workingnomads.com/feed/writing-jobs/", source: "Working Nomads" },
+  // More Remote OK categories
+  { url: "https://remoteok.com/remote-sales-jobs.rss", source: "Remote OK" },
+  { url: "https://remoteok.com/remote-finance-jobs.rss", source: "Remote OK" },
+  { url: "https://remoteok.com/remote-data-jobs.rss", source: "Remote OK" },
+  { url: "https://remoteok.com/remote-seo-jobs.rss", source: "Remote OK" },
+  { url: "https://weworkremotely.com/categories/remote-full-stack-programming-jobs.rss", source: "We Work Remotely" },
   // General remote boards
   { url: "https://jobicy.com/feed/", source: "Jobicy" },
   { url: "https://himalayas.app/jobs/rss", source: "Himalayas" },
   { url: "https://nodesk.co/remote-jobs/rss/", source: "NoDesk" },
+  { url: "https://remotive.com/remote-jobs/feed", source: "Remotive" },
+  { url: "https://jobspresso.co/?feed=job_feed", source: "Jobspresso" },
+  { url: "https://www.skipthedrive.com/feed/", source: "SkipTheDrive" },
+  { url: "https://authenticjobs.com/feed/", source: "Authentic Jobs" },
+  { url: "https://jobs.wordpress.net/feed/", source: "WordPress Jobs" },
   // Freelance gigs (broad "hiring" queries capture every niche)
   { url: "https://www.reddit.com/r/forhire/search.rss?q=hiring&sort=new&restrict_sr=1", source: "Reddit r/forhire" },
   { url: "https://www.reddit.com/r/freelance/search.rss?q=hiring&sort=new&restrict_sr=1", source: "Reddit r/freelance" },

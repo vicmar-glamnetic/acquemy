@@ -65,7 +65,7 @@ export default function AutomationPage() {
       <Card>
         <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><Zap className="w-4 h-4 text-yellow-400" />Find Jobs Now</CardTitle></CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-sm text-muted-foreground">Scans 14 platforms simultaneously — We Work Remotely, Remote OK, Jobicy, Remote.co, Himalayas, Freelancer.com, Reddit communities, and more. AI scores each match using your profile.</p>
+          <p className="text-sm text-muted-foreground">Scans 30+ live job feeds across We Work Remotely, Remote OK, Remotive, Working Nomads, Jobicy, Himalayas, Jobspresso, SkipTheDrive, Authentic Jobs, WordPress Jobs, Freelancer.com, Reddit communities, and more — spanning dev, design, marketing, writing, support, VA, finance & sales. AI scores each match against your profile.</p>
           <Button onClick={scanJobBoards} disabled={scanning} size="sm">
             {scanning ? <><Loader2 className="w-3 h-3 mr-2 animate-spin" />Scanning...</> : <><Zap className="w-3 h-3 mr-2" />Scan for Jobs</>}
           </Button>
