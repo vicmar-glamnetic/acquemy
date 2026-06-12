@@ -297,7 +297,7 @@ export default function ProspectsPage() {
             </Button>
             <Dialog open={addOpen} onOpenChange={v => { setAddOpen(v); if (!v) { setEditProspect(null); setForm(EMPTY); setOutreachResult(null); setActivities([]); } }}>
               <DialogTrigger render={<Button size="sm"><Plus className="w-4 h-4 mr-1.5" />Add Prospect</Button>} />
-              <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+              <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
                 <DialogHeader><DialogTitle className="text-lg">{editProspect ? "Edit Prospect" : "Add New Prospect"}</DialogTitle></DialogHeader>
                 <div className="space-y-3 mt-1">
                   <div className="grid grid-cols-2 gap-3">
@@ -550,7 +550,7 @@ export default function ProspectsPage() {
 
         {/* Import from LinkedIn dialog */}
         <Dialog open={importOpen} onOpenChange={v => { setImportOpen(v); if (!v) setImportUrl(""); }}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="sm:max-w-md">
             <DialogHeader><DialogTitle>Import from LinkedIn</DialogTitle></DialogHeader>
             <p className="text-sm text-muted-foreground">Paste a LinkedIn profile URL and AI will create a prospect from it.</p>
             <Input value={importUrl} onChange={e => setImportUrl(e.target.value)} placeholder="https://linkedin.com/in/..." className="mt-1" onKeyDown={e => e.key === "Enter" && handleLinkedinImport()} />
