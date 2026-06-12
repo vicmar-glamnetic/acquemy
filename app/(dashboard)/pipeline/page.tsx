@@ -8,10 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PIPELINE_STAGES, formatCurrency } from "@/lib/utils";
+import { PIPELINE_STAGES, formatCurrency, cn } from "@/lib/utils";
 import {
   GitBranch, Plus, Loader2, Sparkles, Trash2, Clock, AlertTriangle,
-  TrendingUp, DollarSign, Trophy, Target, Lightbulb,
+  TrendingUp, DollarSign, Trophy, Target, Lightbulb, Search, Check,
 } from "lucide-react";
 
 interface Prospect { id: string; name: string; company: string; niche: string; role?: string; email?: string; }
@@ -44,6 +44,7 @@ export default function PipelinePage() {
   const [coaching, setCoaching] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [addForm, setAddForm] = useState({ prospectId: "", value: "", stage: "Discovered" });
+  const [prospectSearch, setProspectSearch] = useState("");
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -130,6 +131,10 @@ export default function PipelinePage() {
   const lostCount = deals.filter(d => d.stage === "Lost").length;
   const winRate = wonDeals.length + lostCount > 0 ? Math.round((wonDeals.length / (wonDeals.length + lostCount)) * 100) : 0;
   const prospectsWithoutDeal = prospects.filter(p => !deals.some(d => d.prospectId === p.id));
+  const filteredProspects = prospectsWithoutDeal.filter(p => {
+    const q = prospectSearch.toLowerCase();
+    return !q || p.name.toLowerCase().includes(q) || p.company.toLowerCase().includes(q) || (p.niche || "").toLowerCase().includes(q);
+  });
 
   const stats = [
     { label: "Open pipeline", value: formatCurrency(openValue), sub: `${activeDeals.length} active deals`, icon: DollarSign, color: "text-blue-500" },
@@ -300,7 +305,7 @@ export default function PipelinePage() {
       </Dialog>
 
       {/* Add deal modal */}
-      <Dialog open={addOpen} onOpenChange={v => { setAddOpen(v); if (!v) setAddForm({ prospectId: "", value: "", stage: "Discovered" }); }}>
+      <Dialog open={addOpen} onOpenChange={v => { setAddOpen(v); if (!v) { setAddForm({ prospectId: "", value: "", stage: "Discovered" }); setProspectSearch(""); } }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader><DialogTitle>Add Deal to Pipeline</DialogTitle></DialogHeader>
           <div className="space-y-3 mt-1">
@@ -309,12 +314,33 @@ export default function PipelinePage() {
               {prospectsWithoutDeal.length === 0 ? (
                 <p className="text-xs text-muted-foreground mt-1.5">All your prospects are already in the pipeline. Add prospects first.</p>
               ) : (
-                <Select value={addForm.prospectId} onValueChange={v => v && setAddForm(f => ({ ...f, prospectId: v }))}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select a prospect" /></SelectTrigger>
-                  <SelectContent>
-                    {prospectsWithoutDeal.map(p => <SelectItem key={p.id} value={p.id}>{p.name} · {p.company}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <>
+                  <div className="relative mt-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input value={prospectSearch} onChange={e => setProspectSearch(e.target.value)} placeholder="Search by name, company, or niche..." className="pl-9" />
+                  </div>
+                  <div className="mt-1.5 max-h-52 overflow-y-auto rounded-lg border border-border">
+                    {filteredProspects.length === 0 ? (
+                      <p className="px-3 py-6 text-center text-xs text-muted-foreground">No matching prospects</p>
+                    ) : filteredProspects.map(p => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setAddForm(f => ({ ...f, prospectId: p.id }))}
+                        className={cn(
+                          "w-full text-left px-3 py-2 flex items-center justify-between gap-2 border-b border-border last:border-0 transition-colors",
+                          addForm.prospectId === p.id ? "bg-primary/10" : "hover:bg-accent"
+                        )}
+                      >
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-medium">{p.name}</span>
+                          <span className="block truncate text-xs text-muted-foreground">{p.company}{p.niche ? ` · ${p.niche}` : ""}</span>
+                        </span>
+                        {addForm.prospectId === p.id && <Check className="w-4 h-4 text-primary shrink-0" />}
+                      </button>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
             <div className="grid grid-cols-2 gap-3">
