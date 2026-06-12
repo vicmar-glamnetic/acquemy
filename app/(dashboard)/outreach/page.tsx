@@ -49,6 +49,7 @@ export default function OutreachPage() {
   const [form, setForm] = useState({ prospectName: "", company: "", role: "", need: "", channel: "Cold Email", tone: "Professional" });
   const [prospectId, setProspectId] = useState<string | null>(null);
   const [prospectEmail, setProspectEmail] = useState("");
+  const [recipientEmail, setRecipientEmail] = useState("");
 
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
@@ -100,6 +101,7 @@ export default function OutreachPage() {
   function loadProspect(p: Prospect) {
     setForm(f => ({ ...f, prospectName: p.name, company: p.company, role: p.role || "", need: p.scoreReason || p.niche || "" }));
     setProspectId(p.id); setProspectEmail(p.email || ""); setProspectSearch("");
+    if (p.email) setRecipientEmail(p.email);
   }
   function clearProspect() { setProspectId(null); setProspectEmail(""); }
 
@@ -184,7 +186,7 @@ export default function OutreachPage() {
     navigator.clipboard.writeText(text); toast.success("Copied!");
   }
   function openCompose(provider: "gmail" | "yahoo") {
-    const to = encodeURIComponent(prospectEmail || "");
+    const to = encodeURIComponent(recipientEmail.trim());
     const su = encodeURIComponent(subject || "");
     const bd = encodeURIComponent(body);
     const url = provider === "gmail"
@@ -450,7 +452,11 @@ export default function OutreachPage() {
 
                     {/* Email actions */}
                     {isEmail && (
-                      <div className="space-y-1.5">
+                      <div className="space-y-2">
+                        <div>
+                          <Label className="text-xs flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-muted-foreground" />Recipient email <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                          <Input type="email" value={recipientEmail} onChange={e => setRecipientEmail(e.target.value)} placeholder="client@company.com" className="mt-1 h-9" />
+                        </div>
                         <div className="flex gap-2">
                           <Button className="flex-1 bg-red-500 hover:bg-red-600 text-white" onClick={() => openCompose("gmail")} disabled={!body.trim()}>
                             <Mail className="w-4 h-4 mr-1.5" />Compose in Gmail
@@ -460,7 +466,7 @@ export default function OutreachPage() {
                           </Button>
                         </div>
                         <p className="text-[11px] text-muted-foreground text-center">
-                          {prospectEmail ? `Recipient: ${prospectEmail}` : "Opens a prefilled draft — add the “To” there."}
+                          {recipientEmail.trim() ? `Opens prefilled to ${recipientEmail.trim()}` : "Leave blank to add the “To” yourself in the draft."}
                         </p>
                       </div>
                     )}
