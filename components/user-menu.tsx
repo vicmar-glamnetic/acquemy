@@ -5,7 +5,9 @@ import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme, type Theme } from "@/components/theme";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, LogOut, Sun, Moon, Monitor, ChevronDown, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Settings, LogOut, Sun, Moon, Monitor, ChevronDown, User, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const THEME_OPTIONS: { key: Theme; label: string; icon: typeof Sun }[] = [
@@ -18,6 +20,8 @@ export function UserMenu() {
   const { data: session } = useSession();
   const { theme, setTheme, mounted } = useTheme();
   const [open, setOpen] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -109,7 +113,7 @@ export function UserMenu() {
           <div className="h-px bg-border my-1" />
 
           <button
-            onClick={() => signOut({ callbackUrl: "/login" })}
+            onClick={() => { setOpen(false); setConfirmLogout(true); }}
             className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-red-500 hover:bg-red-500/10 transition-colors"
             role="menuitem"
           >
@@ -118,6 +122,26 @@ export function UserMenu() {
           </button>
         </div>
       )}
+
+      {/* Logout confirmation */}
+      <Dialog open={confirmLogout} onOpenChange={v => !signingOut && setConfirmLogout(v)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader><DialogTitle>Sign out?</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            You&apos;ll be signed out of Acquemy and returned to the login screen.
+          </p>
+          <div className="flex gap-2 mt-2">
+            <Button variant="outline" className="flex-1" onClick={() => setConfirmLogout(false)} disabled={signingOut}>Cancel</Button>
+            <Button
+              className="flex-1 bg-red-500 hover:bg-red-600 text-white"
+              onClick={() => { setSigningOut(true); signOut({ callbackUrl: "/login" }); }}
+              disabled={signingOut}
+            >
+              {signingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <><LogOut className="w-4 h-4 mr-1.5" />Sign out</>}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

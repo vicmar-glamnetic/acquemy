@@ -7,7 +7,7 @@ export async function GET() {
   if (error) return error;
   const deals = await prisma.deal.findMany({
     where: { userId: user.id },
-    include: { prospect: { select: { name: true, company: true, niche: true } } },
+    include: { prospect: { select: { id: true, name: true, company: true, niche: true, role: true, email: true } } },
     orderBy: { createdAt: "desc" },
   });
   return NextResponse.json(deals);
