@@ -1,0 +1,229 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String?
+  image         String?
+  emailVerified DateTime?
+
+  // Profile
+  bio           String?
+  skills        String?
+  niche         String?
+  location      String?
+  website       String?
+  portfolioLinks String?
+  resumeUrl     String?
+  rate          String?
+  targetMarkets String?
+  experience    String?
+
+  // Contact & presence
+  headline      String?
+  phone         String?
+  contactEmail  String?
+  linkedin      String?
+  github        String?
+  twitter       String?
+  languages     String?
+  timezone      String?
+  availability  String?
+
+  // NextAuth
+  accounts  Account[]
+  sessions  Session[]
+
+  // App data
+  prospects  Prospect[]
+  deals      Deal[]
+  messages   Message[]
+  followUps  FollowUp[]
+  objections Objection[]
+  proposals  Proposal[]
+  activities Activity[]
+  settings   UserSetting[]
+
+  onboarded Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Prospect {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  company     String
+  country     String?
+  niche       String   @default("")
+  role        String?
+  email       String?
+  linkedinUrl String?
+  website     String?
+  bio         String?
+  source      String?
+  notes       String?
+  score       Int      @default(0)
+  scoreReason String?
+  status      String   @default("new")
+  archived    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deals      Deal[]
+  messages   Message[]
+  followUps  FollowUp[]
+  proposals  Proposal[]
+  activities Activity[]
+  objections Objection[]
+}
+
+model Deal {
+  id             String   @id @default(cuid())
+  userId         String
+  prospectId     String
+  stage          String   @default("Discovered")
+  value          Float    @default(0)
+  currency       String   @default("USD")
+  notes          String?
+  aiNextAction   String?
+  stageEnteredAt DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prospect   Prospect   @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  activities Activity[]
+}
+
+model Message {
+  id         String    @id @default(cuid())
+  userId     String
+  prospectId String?
+  channel    String
+  tone       String
+  content    String
+  sent       Boolean   @default(false)
+  sentAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prospect Prospect? @relation(fields: [prospectId], references: [id], onDelete: SetNull)
+}
+
+model FollowUp {
+  id          String    @id @default(cuid())
+  userId      String
+  prospectId  String
+  step        Int       @default(1)
+  channel     String
+  content     String
+  scheduledAt DateTime
+  sentAt      DateTime?
+  status      String    @default("pending")
+  createdAt   DateTime  @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prospect Prospect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+}
+
+model Objection {
+  id         String   @id @default(cuid())
+  userId     String
+  prospectId String?
+  text       String
+  response   String
+  saved      Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prospect Prospect? @relation(fields: [prospectId], references: [id], onDelete: SetNull)
+}
+
+model Proposal {
+  id          String    @id @default(cuid())
+  userId      String
+  prospectId  String?
+  projectType String
+  storeSize   String
+  details     String?
+  priceMin    Float
+  priceMax    Float
+  timeline    String
+  content     String
+  sentAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prospect Prospect? @relation(fields: [prospectId], references: [id], onDelete: SetNull)
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String
+  description String
+  prospectId  String?
+  dealId      String?
+  createdAt   DateTime @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prospect Prospect? @relation(fields: [prospectId], references: [id], onDelete: SetNull)
+  deal     Deal?     @relation(fields: [dealId], references: [id], onDelete: SetNull)
+}
+
+model UserSetting {
+  id     String @id @default(cuid())
+  userId String
+  key    String
+  value  String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+}
